@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixelated Persona</title>
+    <style>
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Color Scheme (Approximation) */
+        :root {
+            --background: #000000;
+            /* Black */
+            --foreground: #ffffff;
+            /* White */
+            --accent: #34d8eb;
+            /* Cyan/Aqua */
+            --highlight: #eb3452;
+            /* Red/Pink */
+        }
+
+        body {
+            font-family: monospace;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background);
+            color: var(--foreground);
+            text-align: center;
+            /* Center content by default */
+        }
+
+        /* Header & Video */
+        header {
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+        }
+
+        video {
+            width: 100%;
+            /* Full width */
+            height: auto;
+            display: block;
+            /* Remove potential bottom margin */
+        }
+
+        /* Intro */
+        .intro {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .intro img {
+            width: 150px;
+            height: auto;
+            border: 2px solid var(--accent);
+            border-radius: 50%;
+            /* Circular image */
+            margin-bottom: 10px;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            /* Allow tabs to wrap on smaller screens */
+            justify-content: center;
+            /* margin-bottom: 20px; */
+        }
+
+        .tab-button {
+            background-color: var(--background);
+            color: var(--foreground);
+            border: 1px solid var(--accent);
+            padding: 8px 16px;
+            margin: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            /* Remove underline from links */
+            transition: all 0.3s ease;
+        }
+
+        .tab-button:hover {
+            background-color: var(--accent);
+            color: var(--background);
+        }
+
+        /* CSS-only tab functionality using :target */
+        .tab-content {
+            display: none;
+            padding: 20px;
+            border: 1px dashed var(--accent);
+            margin: 0 auto;
+            /* Center the content */
+            width: 80%;
+            /* Set a reasonable width */
+            max-width: 800px;
+            /* Maximum width to prevent excessive stretching */
+            opacity: 0;
+            scroll-margin-top: 4em;
+        }
+
+        /* Show the targeted tab content */
+        .tab-content:target {
+            display: block;
+            opacity: 1;
+            animation: fadeInUp 1s ease forwards;
+        }
+
+        /* Fade-in animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(1em);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Show design tab by default (when no hash in URL) */
+        #design {
+            display: block;
+            opacity: 1;
+            animation: fadeInUp 1s ease forwards;
+        }
+
+        /* Hide design when other tabs are targeted - this actually works! */
+        #design:has(~ .tab-content:target) {
+            display: none;
+        }
+
+        /* default button to selected color */
+        .tab-button[href="#design"] {
+            background-color: var(--accent);
+            color: var(--background);
+        }
+
+        /* style default button as inactive when other anchors are present */
+        html:has(#photos:target) .tab-button[href="#design"],
+        html:has(#videos:target) .tab-button[href="#design"],
+        html:has(#writing:target) .tab-button[href="#design"] {
+            background-color: var(--background);
+            color: var(--foreground);
+        }
+
+        /* each other button selected when anchor is present */
+        html:has(#photos:target) .tab-button[href="#photos"],
+        html:has(#videos:target) .tab-button[href="#videos"],
+        html:has(#writing:target) .tab-button[href="#writing"] {
+            background-color: var(--accent);
+            color: var(--background);
+        }
+
+        /* Sample Items */
+        .sample-item {
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px dotted var(--highlight);
+            text-align: left;
+            /* Align text within samples to the left */
+        }
+
+        /* Thumbnails */
+        .thumbnail {
+            width: 150px;
+            height: 100px;
+            object-fit: cover;
+            border: 2px solid var(--accent);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            margin: 10px 0;
+        }
+
+        .thumbnail:hover {
+            transform: scale(1.05);
+            border-color: var(--highlight);
+        }
+
+        /* PDF Icons */
+        .pdf-icon {
+            width: 64px;
+            height: 64px;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .pdf-icon:hover {
+            transform: scale(1.1);
+        }
+
+        /* CSS-only Lightbox */
+        .lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .lightbox:target {
+            display: flex;
+        }
+
+        .lightbox-content {
+            max-width: 90%;
+            max-height: 90%;
+            position: relative;
+        }
+
+        .lightbox img,
+        .lightbox video {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            color: var(--foreground);
+            font-size: 24px;
+            text-decoration: none;
+            background: var(--highlight);
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .lightbox-close:hover {
+            background: var(--accent);
+            color: var(--background);
+        }
+
+        /* Resume */
+        .resume {
+            padding: 20px;
+            border-top: 2px solid var(--accent);
+            margin-top: 20px;
+        }
+
+        /* 8-bit Styling (Simple) */
+        body {
+            image-rendering: pixelated;
+            /* for images */
+            font-size: 14px;
+            /* Slightly larger for readability */
+        }
+
+        /* Media Queries (Mobile First) */
+        @media (min-width: 600px) {
+
+            /* Small screens and up */
+            .intro img {
+                width: 200px;
+                /* Larger image on larger screens */
+            }
+
+            .thumbnail {
+                width: 200px;
+                height: 133px;
+            }
+        }
+
+        @media (min-width: 900px) {
+
+            /* Medium screens and up */
+            .tab-content {
+                width: 60%;
+                /* Narrower content on larger screens */
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <video autoplay loop muted controls>
+            <source src="COWS_AT_THE_GRASS.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </header>
+
+    <section class="intro">
+        <img src="https://thispersondoesnotexist.com/" alt="Cinematic Headshot">
+        <h1>Pixelated Persona</h1>
+        <p>A creative systems thinker and worker deeply interested in the intersection of design, technology, and
+            artificial intelligence.</p>
+    </section>
+
+    <section class="tabs">
+        <a href="#design" class="tab-button">Design</a>
+        <a href="#photos" class="tab-button">Photos</a>
+        <a href="#videos" class="tab-button">Videos</a>
+        <a href="#writing" class="tab-button">Writing</a>
+    </section>
+
+    <!-- Tab content sections -->
+    <section id="design" class="tab-content">
+        <h2>Design Samples</h2>
+        <div class="sample-item">
+            <h3>Sample 1: Minimalist Poster Design</h3>
+            <a href="#lightbox1">
+                <img src="https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=300&h=200&fit=crop"
+                    alt="Minimalist poster design" class="thumbnail">
+            </a>
+            <p>A clean, minimalist poster design focusing on typography and negative space for maximum visual impact.
+            </p>
+        </div>
+        <div class="sample-item">
+            <h3>Sample 2: Branding Package Mockup</h3>
+            <a href="#lightbox2">
+                <img src="https://images.unsplash.com/photo-1609921141835-710b7fa6e438?w=300&h=200&fit=crop"
+                    alt="Branding package mockup" class="thumbnail">
+            </a>
+            <p>Complete branding package including business cards, letterhead, and logo variations for a tech startup.
+            </p>
+        </div>
+        <div class="sample-item">
+            <h3>Sample 3: Editorial Layout Design</h3>
+            <a href="#lightbox3">
+                <img src="https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=300&h=200&fit=crop"
+                    alt="Editorial layout design" class="thumbnail">
+            </a>
+            <p>Magazine spread design featuring balanced typography, imagery, and white space for optimal readability.
+            </p>
+        </div>
+    </section>
+
+    <section id="photos" class="tab-content">
+        <h2>Photo Samples</h2>
+        <div class="sample-item">
+            <h3>Sample 1: Landscape Photography</h3>
+            <a href="#lightbox4">
+                <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=200&fit=crop"
+                    alt="Mountain landscape" class="thumbnail">
+            </a>
+            <p>Dramatic mountain landscape captured during golden hour, showcasing natural lighting and composition
+                techniques.</p>
+        </div>
+        <div class="sample-item">
+            <h3>Sample 2: Portrait Photography</h3>
+            <a href="#lightbox5">
+                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=200&fit=crop"
+                    alt="Portrait photography" class="thumbnail">
+            </a>
+            <p>Professional portrait with soft lighting and shallow depth of field, emphasizing subject connection.</p>
+        </div>
+        <div class="sample-item">
+            <h3>Sample 3: Street Photography</h3>
+            <a href="#lightbox6">
+                <img src="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=300&h=200&fit=crop"
+                    alt="Street photography" class="thumbnail">
+            </a>
+            <p>Candid street scene capturing authentic human moments and urban architecture interaction.</p>
+        </div>
+    </section>
+
+    <section id="videos" class="tab-content">
+        <h2>Video Samples</h2>
+        <div class="sample-item">
+            <h3>Sample 1: Nature Documentary</h3>
+            <a href="#lightbox7">
+                <video class="thumbnail" muted>
+                    <source
+                        src="https://static.videezy.com/system/resources/previews/000/004/382/original/COWS_AT_THE_GRASS.mp4"
+                        type="video/mp4">
+                </video>
+            </a>
+            <p>Peaceful nature footage capturing cows grazing in a serene pastoral setting with natural lighting.</p>
+        </div>
+        <div class="sample-item">
+            <h3>Sample 2: Cinematic Sequence</h3>
+            <a href="#lightbox8">
+                <video class="thumbnail" muted>
+                    <source
+                        src="https://static.videezy.com/system/resources/previews/000/004/382/original/COWS_AT_THE_GRASS.mp4"
+                        type="video/mp4">
+                </video>
+            </a>
+            <p>Cinematic composition showcasing movement and natural beauty in countryside environment.</p>
+        </div>
+        <div class="sample-item">
+            <h3>Sample 3: Atmospheric Study</h3>
+            <a href="#lightbox9">
+                <video class="thumbnail" muted>
+                    <source
+                        src="https://static.videezy.com/system/resources/previews/000/004/382/original/COWS_AT_THE_GRASS.mp4"
+                        type="video/mp4">
+                </video>
+            </a>
+            <p>Study of atmospheric conditions and natural light changes in rural landscape setting.</p>
+        </div>
+    </section>
+
+    <section id="writing" class="tab-content">
+        <h2>Writing Samples</h2>
+        <div class="sample-item">
+            <h3>Sample 1: DMT and Dreams Research Paper</h3>
+            <a href="https://www.ultius.com/sample-papers/dmt-and-dreams-apa-sample.pdf">
+                <svg class="pdf-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="64" height="64" fill="#eb3452" />
+                    <path d="M16 8h24l8 8v40H16V8z" fill="white" />
+                    <path d="M40 8v8h8" stroke="#eb3452" stroke-width="2" fill="none" />
+                    <text x="32" y="35" text-anchor="middle" fill="#eb3452" font-size="8" font-weight="bold">PDF</text>
+                </svg>
+            </a>
+            <p>An academic research paper exploring the relationship between DMT experiences and dream states, formatted
+                in APA style.</p>
+        </div>
+        <div class="sample-item">
+            <h3>Sample 2: Death with Dignity Essay</h3>
+            <a href="https://www.ultius.com/sample-papers/death-with-dignity.pdf">
+                <svg class="pdf-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="64" height="64" fill="#eb3452" />
+                    <path d="M16 8h24l8 8v40H16V8z" fill="white" />
+                    <path d="M40 8v8h8" stroke="#eb3452" stroke-width="2" fill="none" />
+                    <text x="32" y="35" text-anchor="middle" fill="#eb3452" font-size="8" font-weight="bold">PDF</text>
+                </svg>
+            </a>
+            <p>A thoughtful exploration of ethical considerations surrounding end-of-life care and patient autonomy.</p>
+        </div>
+        <div class="sample-item">
+            <h3>Sample 3: Hamlet Literary Analysis</h3>
+            <a href="https://www.ultius.com/sample-papers/hamlet_paper.pdf">
+                <svg class="pdf-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="64" height="64" fill="#eb3452" />
+                    <path d="M16 8h24l8 8v40H16V8z" fill="white" />
+                    <path d="M40 8v8h8" stroke="#eb3452" stroke-width="2" fill="none" />
+                    <text x="32" y="35" text-anchor="middle" fill="#eb3452" font-size="8" font-weight="bold">PDF</text>
+                </svg>
+            </a>
+            <p>In-depth literary analysis of Shakespeare's Hamlet, examining themes of revenge, madness, and moral
+                corruption.</p>
+        </div>
+    </section>
+
+    <section class="resume">
+        <h2>Resume</h2>
+        <p><strong>Name:</strong> Pixelated Persona</p>
+        <p><strong>Email:</strong> pixel@example.com</p>
+        <p><strong>Skills:</strong> Creative Thinking, Systems Design, AI Awareness, Web Development</p>
+        <p><strong>Experience:</strong> Learning and Experimenting</p>
+    </section>
+
+    <!-- Design Lightbox containers -->
+    <div id="lightbox1" class="lightbox">
+        <div class="lightbox-content">
+            <a href="#design" class="lightbox-close">&times;</a>
+            <img src="https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=800&h=600&fit=crop"
+                alt="Minimalist poster design">
+        </div>
+    </div>
+
+    <div id="lightbox2" class="lightbox">
+        <div class="lightbox-content">
+            <a href="#design" class="lightbox-close">&times;</a>
+            <img src="https://images.unsplash.com/photo-1609921141835-710b7fa6e438?w=800&h=600&fit=crop"
+                alt="Branding package mockup">
+        </div>
+    </div>
+
+    <div id="lightbox3" class="lightbox">
+        <div class="lightbox-content">
+            <a href="#design" class="lightbox-close">&times;</a>
+            <img src="https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=800&h=600&fit=crop"
+                alt="Editorial layout design">
+        </div>
+    </div>
+
+    <!-- Photo Lightbox containers -->
+    <div id="lightbox4" class="lightbox">
+        <div class="lightbox-content">
+            <a href="#photos" class="lightbox-close">&times;</a>
+            <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop"
+                alt="Mountain landscape">
+        </div>
+    </div>
+
+    <div id="lightbox5" class="lightbox">
+        <div class="lightbox-content">
+            <a href="#photos" class="lightbox-close">&times;</a>
+            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=600&fit=crop"
+                alt="Portrait photography">
+        </div>
+    </div>
+
+    <div id="lightbox6" class="lightbox">
+        <div class="lightbox-content">
+            <a href="#photos" class="lightbox-close">&times;</a>
+            <img src="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=800&h=600&fit=crop"
+                alt="Street photography">
+        </div>
+    </div>
+
+    <!-- Video Lightbox containers -->
+    <div id="lightbox7" class="lightbox">
+        <div class="lightbox-content">
+            <a href="#videos" class="lightbox-close">&times;</a>
+            <video muted controls>
+                <source
+                    src="https://static.videezy.com/system/resources/previews/000/004/382/original/COWS_AT_THE_GRASS.mp4"
+                    type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+    </div>
+
+    <div id="lightbox8" class="lightbox">
+        <div class="lightbox-content">
+            <a href="#videos" class="lightbox-close">&times;</a>
+            <video muted controls>
+                <source
+                    src="https://static.videezy.com/system/resources/previews/000/004/382/original/COWS_AT_THE_GRASS.mp4"
+                    type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+    </div>
+
+    <div id="lightbox9" class="lightbox">
+        <div class="lightbox-content">
+            <a href="#videos" class="lightbox-close">&times;</a>
+            <video muted controls>
+                <source
+                    src="https://static.videezy.com/system/resources/previews/000/004/382/original/COWS_AT_THE_GRASS.mp4"
+                    type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+    </div>
+
+</body>
+
+</html>
