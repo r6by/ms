@@ -214,17 +214,36 @@
             display: flex;
         }
 
+        /* Clickable background area to close lightbox */
+        .lightbox-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            cursor: pointer;
+        }
+
         .lightbox-content {
             max-width: 90%;
             max-height: 90%;
             position: relative;
+            z-index: 2;
         }
 
-        .lightbox img,
-        .lightbox video {
+        .lightbox img {
             max-width: 100%;
             max-height: 100%;
             object-fit: contain;
+        }
+
+        .lightbox video {
+            max-width: 100%;
+            max-height: 100%;
+            width: 800px;
+            height: auto;
+            display: block;
         }
 
         .lightbox-close {
@@ -241,6 +260,7 @@
             align-items: center;
             justify-content: center;
             border-radius: 50%;
+            z-index: 3;
         }
 
         .lightbox-close:hover {
@@ -462,6 +482,7 @@
 
     <!-- Design Lightbox containers -->
     <div id="lightbox1" class="lightbox">
+        <a href="#design" class="lightbox-background"></a>
         <div class="lightbox-content">
             <a href="#design" class="lightbox-close">&times;</a>
             <img src="https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=800&h=600&fit=crop"
@@ -470,6 +491,7 @@
     </div>
 
     <div id="lightbox2" class="lightbox">
+        <a href="#design" class="lightbox-background"></a>
         <div class="lightbox-content">
             <a href="#design" class="lightbox-close">&times;</a>
             <img src="https://images.unsplash.com/photo-1609921141835-710b7fa6e438?w=800&h=600&fit=crop"
@@ -478,6 +500,7 @@
     </div>
 
     <div id="lightbox3" class="lightbox">
+        <a href="#design" class="lightbox-background"></a>
         <div class="lightbox-content">
             <a href="#design" class="lightbox-close">&times;</a>
             <img src="https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=800&h=600&fit=crop"
@@ -487,6 +510,7 @@
 
     <!-- Photo Lightbox containers -->
     <div id="lightbox4" class="lightbox">
+        <a href="#photos" class="lightbox-background"></a>
         <div class="lightbox-content">
             <a href="#photos" class="lightbox-close">&times;</a>
             <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop"
@@ -495,6 +519,7 @@
     </div>
 
     <div id="lightbox5" class="lightbox">
+        <a href="#photos" class="lightbox-background"></a>
         <div class="lightbox-content">
             <a href="#photos" class="lightbox-close">&times;</a>
             <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=600&fit=crop"
@@ -503,6 +528,7 @@
     </div>
 
     <div id="lightbox6" class="lightbox">
+        <a href="#photos" class="lightbox-background"></a>
         <div class="lightbox-content">
             <a href="#photos" class="lightbox-close">&times;</a>
             <img src="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=800&h=600&fit=crop"
@@ -512,6 +538,7 @@
 
     <!-- Video Lightbox containers -->
     <div id="lightbox7" class="lightbox">
+        <a href="#videos" class="lightbox-background"></a>
         <div class="lightbox-content">
             <a href="#videos" class="lightbox-close">&times;</a>
             <video muted controls>
@@ -524,6 +551,7 @@
     </div>
 
     <div id="lightbox8" class="lightbox">
+        <a href="#videos" class="lightbox-background"></a>
         <div class="lightbox-content">
             <a href="#videos" class="lightbox-close">&times;</a>
             <video muted controls>
@@ -536,6 +564,7 @@
     </div>
 
     <div id="lightbox9" class="lightbox">
+        <a href="#videos" class="lightbox-background"></a>
         <div class="lightbox-content">
             <a href="#videos" class="lightbox-close">&times;</a>
             <video muted controls>
